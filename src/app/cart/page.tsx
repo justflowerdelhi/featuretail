@@ -83,8 +83,9 @@ export default function CartPage() {
                       <Image
                         src={imageUrl}
                         alt={item.name}
-                        fill
-                        className="object-contain p-2"
+                        width={80}
+                        height={80}
+                        className="rounded object-cover"
                       />
                     );
                   })()}
