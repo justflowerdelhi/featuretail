@@ -27,7 +27,7 @@ export default function ProductCard({ product }: Props) {
   const categorySlug =
     typeof product.category === "string"
       ? product.category
-      : product.category?.slug || "all";
+      : product.category?.slug ?? "all";
 
   return (
     <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition p-4 border border-gray-100 flex flex-col">

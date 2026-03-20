@@ -1,10 +1,16 @@
+type Category =
+  | string
+  | {
+      slug?: string;
+    };
+
 export interface Product {
   id: string;
   name: string;
   slug: string;
   price: number;
   images: string[];
-  category: string;
+  category?: Category;
   stock: number;
   tags?: string[];
   createdAt: string;
