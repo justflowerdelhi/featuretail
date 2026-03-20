@@ -24,9 +24,14 @@ export default function ProductCard({ product }: Props) {
   const isNewArrival = Date.now() - new Date(product.createdAt).getTime() <= 1000 * 60 * 60 * 24 * 14; // 14 days
   const primaryImage = product.images?.[0] || "/images/product-placeholder.png";
 
+  const categorySlug =
+    typeof product.category === "string"
+      ? product.category
+      : product.category?.slug || "all";
+
   return (
     <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition p-4 border border-gray-100 flex flex-col">
-      <Link href={`/shop/${product.category?.slug || "all"}/${product.slug}`} className="flex-1">
+      <Link href={`/shop/${categorySlug}/${product.slug}`} className="flex-1">
         <div>
           <div className="relative w-full h-48 mb-4">
             {isBestSeller && (
