@@ -71,14 +71,15 @@ export default function CartPage() {
                 >
                   <Image
                     src={
-                      item.images && item.images[0]
-                        ? item.images[0].url
+                      item.images?.[0]
+                        ? typeof item.images[0] === "string"
+                          ? item.images[0]
+                          : item.images[0].url
                         : "/placeholder.png"
                     }
                     alt={item.name}
-                    width={80}
-                    height={80}
-                    className="rounded"
+                    fill
+                    className="object-contain p-2"
                   />
 
                   <div className="flex-1">
