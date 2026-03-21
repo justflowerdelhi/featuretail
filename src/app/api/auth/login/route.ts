@@ -4,6 +4,13 @@ import jwt from "jsonwebtoken";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
+
+  // TEMP DEBUG LOGS
+  console.log("PRISMA:", prisma);
+  console.log("USER MODEL:", prisma.user);
+  console.log("JWT_SECRET:", process.env.JWT_SECRET);
+
+
   const { email, password } = await req.json();
 
   const user = await prisma.user.findUnique({ where: { email } });
@@ -15,6 +22,7 @@ export async function POST(req: Request) {
   const isValid = await bcrypt.compare(password, user.password);
 
   if (!isValid) {
+    console.log("DB PASSWORD:", user.password);
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }
 
