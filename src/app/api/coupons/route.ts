@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -9,10 +10,15 @@ const prisma = new PrismaClient({ adapter });
 
 export async function POST(req: Request) {
   try {
+    const headersList = await headers();
+    const storeId = headersList.get("x-store-id");
+    if (!storeId) {
+      return NextResponse.json({ success: false, message: "Store not found" }, { status: 400 });
+    }
     const { code, subtotal } = await req.json();
 
-    const coupon = await prisma.coupon.findUnique({
-      where: { code: code.toUpperCase() },
+    const coupon = await prisma.coupon.findFirst({
+      where: { code: code.toUpperCase(), storeId },
     });
 
     if (!coupon || !coupon.isActive) {

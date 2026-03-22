@@ -4,17 +4,25 @@ async function getProducts() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/products`, {
     cache: "no-store",
   });
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("API ERROR:", text);
+    return [];
+  }
   return res.json();
 }
 
 export default async function BestSellers() {
   const products = await getProducts();
+  console.log("ALL PRODUCTS:", JSON.stringify(products, null, 2));
   if (!Array.isArray(products)) {
     return null;
   }
-  const bestProducts = products
-    .filter((p: any) => p.tags?.includes("best-seller") && p.stock > 0)
-    .slice(0, 4);
+    const bestProducts = products
+      .filter((p: any) =>
+        p.tags?.some((t: any) => t.tag?.name === "best-seller") && p.stock > 0
+      )
+      .slice(0, 4);
   if (bestProducts.length === 0) return null;
 
   return (
@@ -26,7 +34,11 @@ export default async function BestSellers() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {bestProducts.map((product: any) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard
+              key={product.id}
+              product={product}
+              categorySlug={product.category?.slug || "all"}
+            />
           ))}
         </div>
       </div>

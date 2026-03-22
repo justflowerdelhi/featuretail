@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const token = cookies().get("token");
+    const cookieStore = await cookies(); // ✅ FIX
+    const token = cookieStore.get("token");
 
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -16,6 +17,7 @@ export async function GET() {
 
     const orders = await prisma.order.count();
     const products = await prisma.product.count();
+
     const customers = await prisma.order.groupBy({
       by: ["shippingEmail"],
     });

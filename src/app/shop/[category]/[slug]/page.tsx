@@ -35,12 +35,22 @@ export default function ProductPage() {
     return <div className="p-8 text-center">Loading...</div>;
   }
 
-  const images =
+
+  // Step 1 — Normalize images BEFORE render
+  const rawImages =
     selectedVariant?.images?.length > 0
       ? selectedVariant.images
       : product.images || [];
 
-  const selectedImage = images?.[currentIndex]?.url || "";
+  const validImages = (rawImages || [])
+    .map((img: any) => {
+      if (typeof img === "string") return img;
+      if (img?.url) return img.url;
+      return null;
+    })
+    .filter(Boolean); // ✅ removes null/undefined/empty
+
+  const selectedImage = validImages[currentIndex] || "/placeholder.jpg";
 
   const price = selectedVariant?.price ?? product.price ?? 0;
 
@@ -48,13 +58,13 @@ export default function ProductPage() {
     (selectedVariant?.stock ?? product.stock ?? 0) <= 0;
 
   const goNext = () => {
-    if (!images.length) return;
-    setCurrentIndex((prev) => (prev + 1) % images.length);
+    if (!validImages.length) return;
+    setCurrentIndex((prev) => (prev + 1) % validImages.length);
   };
 
   const goPrev = () => {
-    if (!images.length) return;
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+    if (!validImages.length) return;
+    setCurrentIndex((prev) => (prev - 1 + validImages.length) % validImages.length);
   };
 
   return (
@@ -64,17 +74,18 @@ export default function ProductPage() {
 
         {/* LEFT - IMAGES */}
         <div className="md:col-span-2">
+
           <div
             onClick={() => setIsOpen(true)}
             className="relative w-full h-[320px] border rounded mb-4 overflow-hidden cursor-zoom-in"
           >
             {selectedImage ? (
               <div className="relative w-full h-64">
-                <Image
+                <img
                   src={selectedImage}
                   alt={product.name}
-                  fill
-                  className="object-contain p-4"
+                  className="object-contain p-4 w-full h-full"
+                  style={{ objectFit: 'contain' }}
                 />
               </div>
             ) : (
@@ -85,28 +96,15 @@ export default function ProductPage() {
           </div>
 
           {/* THUMBNAILS */}
-          <div className="flex gap-3">
-            {images.map((img: any, index: number) => (
-              <div
+          <div className="flex gap-2 mt-2">
+            {validImages.map((img: string, index: number) => (
+              <img
                 key={index}
+                src={img}
+                className="w-16 h-16 object-cover border rounded cursor-pointer"
                 onClick={() => setCurrentIndex(index)}
-                className={`relative w-20 h-20 border rounded cursor-pointer transition ${
-                  currentIndex === index
-                    ? "border-pink-600"
-                    : "border-gray-300 hover:border-gray-500"
-                }`}
-              >
-                {img?.url && (
-                  <div className="relative w-full h-64">
-                    <Image
-                      src={img.url}
-                      alt={product.name}
-                      fill
-                      className="object-contain p-1"
-                    />
-                  </div>
-                )}
-              </div>
+                alt={product.name}
+              />
             ))}
           </div>
         </div>

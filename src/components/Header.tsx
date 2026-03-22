@@ -1,97 +1,77 @@
-
 "use client";
 
-import SearchBar from "./SearchBar";
+import { useStore } from "@/context/StoreContext";
 import { useCart } from "@/context/CartContext";
-import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
 export default function Header() {
-  const { cart, subtotal } = useCart();
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+  const { store } = useStore();
+  const { cart, setIsCartOpen } = useCart();
 
-  useEffect(() => {
-    const handler = (e: any) => {
-      if (ref.current && !(ref.current as HTMLElement).contains(e.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
+  // ✅ Better count (handles quantity also)
+  const totalItems = cart.reduce(
+    (sum: number, item: any) => sum + (item.quantity || 1),
+    0
+  );
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b">
-      <div className="max-w-7xl mx-auto flex items-center justify-between py-4">
-        {/* Logo */}
-        <div className="flex items-center gap-2">
-          <img src="/logo.png" className="h-10" />
-          <span className="font-bold text-lg">3A Featuretail</span>
-        </div>
-        {/* Search */}
-        <div className="flex-1 mx-10">
-          <SearchBar />
-        </div>
-        {/* Cart */}
-        <div className="relative" ref={ref}>
-          <button
-            onClick={() => setOpen(!open)}
-            className="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-100"
-          >
-            🛒 Cart ({cart.length})
-          </button>
 
-          {open && (
-            <div className="absolute right-0 mt-2 w-72 bg-white border rounded-lg shadow-lg p-4 z-50">
-              {cart.length === 0 ? (
-                <p className="text-sm text-gray-500">Cart is empty</p>
-              ) : (
-                <>
-                  {cart.map((item) => (
-                    <div
-                      key={`${item.id}-${item.variantId || "default"}`}
-                      className="flex justify-between text-sm mb-2"
-                    >
-                      <span>{item.name}</span>
-                      <span>₹{item.price} × {item.quantity}</span>
-                    </div>
-                  ))}
+      {/* TOP ROW */}
+      <div className="flex items-center justify-between px-6 py-3">
 
-                  <div className="border-t pt-2 mt-2 font-semibold">
-                    Subtotal: ₹{subtotal}
-                  </div>
-
-                  <div className="flex gap-2 mt-3">
-                    <Link
-                      href="/cart"
-                      className="flex-1 text-center bg-gray-200 py-2 rounded"
-                    >
-                      View Cart
-                    </Link>
-
-                    <Link
-                      href="/checkout"
-                      className="flex-1 text-center bg-pink-600 text-white py-2 rounded"
-                    >
-                      Checkout
-                    </Link>
-                  </div>
-                </>
-              )}
-            </div>
+        {/* LOGO */}
+        <Link href="/" className="flex items-center">
+          {store?.logo ? (
+            <img
+              src={store.logo}
+              alt="logo"
+              className="h-16 w-auto object-contain"
+            />
+          ) : (
+            <span className="text-xl font-bold">
+              {store?.name || "Featuretail"}
+            </span>
           )}
+        </Link>
+
+        {/* SEARCH BAR */}
+        <div className="flex-1 mx-6">
+          <input
+            type="text"
+            placeholder="Search products..."
+            className="w-full border px-4 py-2 rounded"
+          />
         </div>
+
+        {/* CART */}
+        <div>
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="text-sm font-medium"
+          >
+            Cart ({totalItems})
+          </button>
+        </div>
+
       </div>
-      {/* Navigation */}
-      <nav className="border-t">
-        <div className="max-w-7xl mx-auto flex gap-6 py-3 text-sm">
-          <a href="/">Home</a>
-          <a href="/shop">Shop</a>
-          <a href="/about">About</a>
-          <a href="/contact">Contact</a>
-        </div>
-      </nav>
+
+      {/* CATEGORY QUICK LINKS */}
+      <div className="flex gap-4 text-xs text-gray-600 px-6 pb-2">
+        <span>Art & Craft</span>
+        <span>Birthday</span>
+        <span>Gift Packaging</span>
+        <span>Home Decor</span>
+      </div>
+
+      {/* NAVIGATION */}
+      <div className="flex gap-6 px-6 py-2 text-sm border-t">
+        <Link href="/">Home</Link>
+        <Link href="/shop">Shop</Link>
+        <Link href="/about">About</Link>
+        <Link href="/contact">Contact</Link>
+      </div>
+
     </header>
   );
 }

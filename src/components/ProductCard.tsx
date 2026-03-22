@@ -1,153 +1,154 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { Product } from "../data/products";
 import { useCart } from "@/context/CartContext";
 import { useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
-interface Props {
-  product: Product;
-}
+export default function ProductCard({ product, categorySlug }: any) {
+  if (!product) return null;
 
-const currencyFormatter = new Intl.NumberFormat("en-IN", {
-  style: "currency",
-  currency: "INR",
-  maximumFractionDigits: 0,
-});
-export default function ProductCard({ product }: Props) {
-  const { addToCart } = useCart();
-  const [added, setAdded] = useState(false);
-  const isOutOfStock = product.stock <= 0;
-  const isBestSeller = product.tags?.includes("best-seller");
-  const isNewArrival = Date.now() - new Date(product.createdAt).getTime() <= 1000 * 60 * 60 * 24 * 14; // 14 days
-  const firstImage = product.images?.[0];
+  const { addToCart, setIsCartOpen } = useCart();
+  const [loading, setLoading] = useState(false);
+
+  // ✅ Safe Image
   const imageUrl =
-    typeof firstImage === "string"
-      ? firstImage
-      : firstImage?.url || "/placeholder.jpg";
+    Array.isArray(product?.images) && product.images.length > 0
+      ? product.images[0]
+      : "/placeholder.jpg";
 
-  const categorySlug =
-    typeof product.category === "string"
-      ? product.category
-      : product.category?.slug ?? "all";
+  const isOutOfStock = product.stock === 0;
+  const isBestSeller = product.tags?.some(
+    (t: any) => t.tag?.name === "best-seller"
+  );
+  const isNewArrival = product.tags?.some(
+    (t: any) => t.tag?.name === "new-arrival"
+  );
+  const isFeatured = product.tags?.some(
+    (t: any) => t.tag?.name === "featured"
+  );
+
+  const currency = new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+  });
 
   return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition p-4 border border-gray-100 flex flex-col">
-      <Link href={`/shop/${categorySlug}/${product.slug}`} className="flex-1">
-        <div>
-          <div className="relative w-full h-48 mb-4">
-            {isBestSeller && (
-              <span className="absolute top-3 left-3 bg-pink-600 text-white text-xs font-semibold px-3 py-1 rounded-full z-10">
-                Best Seller
-              </span>
-            )}
-            {isNewArrival && (
-              <span className="absolute top-3 right-3 bg-emerald-600 text-white text-xs font-semibold px-3 py-1 rounded-full z-10">
-                New
-              </span>
-            )}
-            <img
-              src={
-                (() => {
-                  const firstImage = product.images?.[0];
-                  if (typeof firstImage === "string") {
-                    return firstImage;
-                  } else if (firstImage && typeof firstImage === "object" && "url" in firstImage) {
-                    return firstImage.url;
-                  } else {
-                    return "/placeholder.jpg";
-                  }
-                })()
-              }
-              alt={product.name}
-              className="w-full h-48 object-cover rounded"
-            />
-          </div>
+    <div className="group bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg transition duration-300 overflow-hidden flex flex-col">
 
-          <h3 className="text-sm font-medium line-clamp-2">
-            {product.name}
-          </h3>
+      {/* IMAGE */}
+      <Link href={`/shop/${categorySlug}/${product.slug}`}>
+        <div className="relative h-52 bg-gray-100 overflow-hidden">
 
-          <p className="text-sm text-gray-500 mb-2">
-            Stock: {isOutOfStock ? "Sold out" : `${product.stock} left`}
-          </p>
 
-          <p className="text-pink-600 font-bold text-lg mb-3">
-            {currencyFormatter.format(product.price)}
-          </p>
+          {/* BADGES */}
+          {isBestSeller && (
+            <span className="absolute top-2 left-2 bg-pink-600 text-white text-xs px-2 py-1 rounded">
+              🔥 Best Seller
+            </span>
+          )}
+
+          {isNewArrival && (
+            <span className="absolute top-2 right-2 bg-green-600 text-white text-xs px-2 py-1 rounded">
+              🆕 New
+            </span>
+          )}
+
+          {isFeatured && (
+            <span className="absolute bottom-2 left-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded">
+              ⭐ Featured
+            </span>
+          )}
+
+          {/* Image */}
+          <img
+            src={imageUrl}
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
+          />
         </div>
       </Link>
 
-      <button
-        onClick={() => {
-          addToCart({
-            ...product,
-            images: product.images && product.images.length > 0
-              ? product.images
-              : ["/placeholder.jpg"],
-            quantity: 1,
-          });
-          toast.success("Added to cart 🛒");
-          setAdded(true);
-          setTimeout(() => {
-            setAdded(false);
-          }, 2000);
-        }}
-        className="bg-pink-600 text-white px-4 py-2 rounded"
-      >
-        Add to Cart
-      </button>
+      {/* CONTENT */}
+      <div className="p-3 flex flex-col flex-1">
 
-      {added && (
-        <div className="fixed bottom-6 right-6 bg-white border shadow-lg rounded-lg p-4 z-50">
-          <p className="text-green-600 font-semibold">
-            ✔ Item added to cart
-          </p>
-          <p className="text-sm mt-1">{product.name}</p>
-          <div className="flex gap-3 mt-3">
-            <Link
-              href="/cart"
-              className="text-sm bg-gray-200 px-3 py-1 rounded"
-            >
-              View Cart
-            </Link>
-            <button
-              onClick={() => setAdded(false)}
-              className="text-sm bg-pink-600 text-white px-3 py-1 rounded"
-            >
-              Continue
-            </button>
-          </div>
+        <Link href={`/shop/${categorySlug}/${product.slug}`}>
+          <h3 className="text-sm font-medium line-clamp-2 min-h-[40px] hover:text-pink-600 transition">
+            {product.name}
+          </h3>
+        </Link>
+
+        {/* Rating */}
+        <div className="text-yellow-500 text-sm mt-1">
+          ⭐⭐⭐⭐☆ <span className="text-gray-400">(124)</span>
         </div>
-      )}
 
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org/",
-            "@type": "Product",
-            name: product.name,
-            image: product.images,
-            description: product.name,
-            brand: {
-              "@type": "Brand",
-              name: "3A Featuretail",
-            },
-            offers: {
-              "@type": "Offer",
-              priceCurrency: "INR",
-              price: product.price,
-              availability:
-                product.stock > 0
-                  ? "https://schema.org/InStock"
-                  : "https://schema.org/OutOfStock",
-            },
-          }),
-        }}
-      />
+        {/* Stock */}
+        <div className="text-xs text-gray-500 mt-1">
+          {isOutOfStock
+            ? "❌ Out of stock"
+            : product.stock < 5
+            ? `⚠️ Only ${product.stock} left`
+            : `${product.stock} in stock`}
+        </div>
+
+        {/* Price */}
+        <div className="mt-2">
+          <span className="text-pink-600 font-bold text-lg">
+            {currency.format(product.price)}
+          </span>
+        </div>
+
+        {/* BUTTON */}
+        <button
+          disabled={isOutOfStock || loading}
+          onClick={() => {
+            setLoading(true);
+            addToCart({
+              ...product,
+              images: product.images?.length
+                ? product.images.map((img: any) =>
+                    typeof img === "string" ? img : img.url
+                  )
+                : ["/placeholder.jpg"],
+              quantity: 1,
+            });
+            setIsCartOpen(true); // 🔥 OPEN DRAWER
+            toast.custom((t) => (
+              <div className="bg-white shadow-lg border rounded-lg p-4 flex items-center gap-3">
+                <img
+                  src={imageUrl}
+                  className="w-12 h-12 object-cover rounded"
+                />
+                <div>
+                  <p className="text-sm font-semibold">
+                    Added to cart
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    {product.name}
+                  </p>
+                  <p className="text-xs text-pink-600">
+                    Qty: 1
+                  </p>
+                </div>
+              </div>
+            ));
+
+            setTimeout(() => setLoading(false), 800);
+          }}
+          className={`mt-3 py-2 rounded-md text-sm font-medium transition ${
+            isOutOfStock
+              ? "bg-gray-300 cursor-not-allowed"
+              : "bg-pink-600 hover:bg-pink-700 text-white"
+          }`}
+        >
+          {isOutOfStock
+            ? "Out of Stock"
+            : loading
+            ? "Adding..."
+            : "Add to Cart"}
+        </button>
+      </div>
     </div>
   );
 }

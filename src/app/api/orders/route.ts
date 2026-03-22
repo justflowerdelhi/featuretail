@@ -1,8 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { sendOrderEmail } from "../_lib/mail";
+import { headers } from "next/headers";
+
 export async function POST(req: Request) {
   try {
+    const headersList = await headers();
+    const storeId = headersList.get("x-store-id");
     const body = await req.json();
     if (!body.items || body.items.length === 0) {
       return NextResponse.json(
@@ -43,6 +47,7 @@ export async function POST(req: Request) {
         billingPincode: billing.pincode,
         companyName: billing.companyName,
         gstNumber: billing.gstNumber,
+        storeId: storeId!, // ✅ CRITICAL
         // Items
         items: {
           create: body.items?.map((item: any) => ({
@@ -101,7 +106,15 @@ export async function POST(req: Request) {
 
 export async function GET() {
   try {
+    const headersList = await headers();
+    const storeId = headersList.get("x-store-id");
     const orders = await prisma.order.findMany({
+      where: {
+        storeId: storeId!,
+      },
+      include: {
+        items: true,
+      },
       orderBy: {
         createdAt: "desc",
       },

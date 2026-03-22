@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
@@ -9,11 +10,16 @@ const prisma = new PrismaClient({ adapter });
 
 export async function GET() {
   try {
+    const headersList = await headers();
+    const storeId = headersList.get("x-store-id");
+    if (!storeId) {
+      return NextResponse.json({ error: "Store not found" }, { status: 400 });
+    }
     const subcategories = await prisma.subCategory.findMany({
+      where: { storeId },
       include: { category: true },
       orderBy: { name: "asc" },
     });
-
     return NextResponse.json(subcategories);
   } catch (error) {
     console.error("Error fetching subcategories", error);
@@ -23,12 +29,15 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const headersList = await headers();
+    const storeId = headersList.get("x-store-id");
+    if (!storeId) {
+      return NextResponse.json({ error: "Store not found" }, { status: 400 });
+    }
     const data = await req.json();
-
     const subCategory = await prisma.subCategory.create({
-      data,
+      data: { ...data, storeId },
     });
-
     return NextResponse.json(subCategory, { status: 201 });
   } catch (error) {
     console.error("Error creating subcategory", error);

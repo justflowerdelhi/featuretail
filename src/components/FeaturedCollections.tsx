@@ -15,7 +15,7 @@ export default function FeaturedCollections() {
         <div className="grid md:grid-cols-4 gap-6">
           {collections.map((c) => (
             <a key={c.name} href={c.link}>
-              <div className="rounded-lg overflow-hidden shadow hover:shadow-lg transition">
+              <div className="rounded-lg overflow-hidden shadow hover:shadow-lg transition duration-200">
                 <img
                   src={c.image}
                   alt={c.name}

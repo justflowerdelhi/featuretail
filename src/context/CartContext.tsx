@@ -31,11 +31,14 @@ interface CartContextType {
   setPaymentMethod: (method: "cod" | "prepaid") => void;
   increaseQty: (id: string, variantId?: string) => void;
   decreaseQty: (id: string, variantId?: string) => void;
+  isCartOpen: boolean;
+  setIsCartOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
+    const [isCartOpen, setIsCartOpen] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
 
   // Must be defined here so setCart is in scope
@@ -146,6 +149,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setPaymentMethod,
         increaseQty,
         decreaseQty,
+        isCartOpen,
+        setIsCartOpen,
       }}
     >
       {children}

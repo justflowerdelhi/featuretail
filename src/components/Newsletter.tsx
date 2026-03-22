@@ -13,7 +13,7 @@ export default function Newsletter() {
           placeholder="Enter your email"
           className="border px-4 py-2 rounded w-64"
         />
-        <button className="bg-pink-600 text-white px-5 py-2 rounded">
+        <button className="bg-pink-600 text-white px-5 py-2 rounded transform hover:scale-105 transition duration-200">
           Subscribe
         </button>
       </div>

@@ -29,7 +29,11 @@ export default function CategoriesPage() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch("/api/admin/categories?includeSub=true");
+      const res = await fetch("/api/admin/categories?includeSub=true", {
+        headers: {
+          "x-store-id": localStorage.getItem("storeId") || ""
+        }
+      });
       if (!res.ok) {
         console.error("API error: ", res.status, await res.text());
         setCategories([]);
@@ -52,21 +56,23 @@ export default function CategoriesPage() {
 
   const addCategory = async () => {
     if (!newCategory) return;
-    try {
-      const res = await fetch("/api/admin/categories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: newCategory,
-          slug: newSlug,
-        }),
-      });
-      if (!res.ok) {
-        console.error("API error on addCategory:", res.status, await res.text());
-      }
-    } catch (error) {
-      console.error("Failed to add category:", error);
-    }
+
+    const res = await fetch("/api/admin/categories", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // ✅ ADD THIS
+        "x-store-id": localStorage.getItem("storeId") || ""
+      },
+      body: JSON.stringify({
+        name: newCategory,
+        slug: newSlug,
+      }),
+    });
+
+    const data = await res.json();
+    console.log("CATEGORY RESPONSE:", data);
+
     setNewCategory("");
     setNewSlug("");
     fetchCategories();
@@ -85,7 +91,10 @@ export default function CategoriesPage() {
   const addSubCategory = async () => {
     await fetch("/api/admin/subcategories", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-store-id": localStorage.getItem("storeId") || ""
+      },
       body: JSON.stringify({
         name: subName,
         slug: subSlug,

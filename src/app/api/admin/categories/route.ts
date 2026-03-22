@@ -1,10 +1,15 @@
-
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { headers } from "next/headers";
 
 export async function GET() {
   try {
+    const headersList = await headers(); // ✅ FIX
+    const storeId = headersList.get("x-store-id");
     const categories = await prisma.category.findMany({
+      where: {
+        storeId: storeId!,
+      },
       include: {
         subCategories: true
       },
@@ -23,10 +28,15 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const headersList = await headers();
+  const storeId = headersList.get("x-store-id");
   const data = await req.json();
 
   const category = await prisma.category.create({
-    data,
+    data: {
+      ...data,
+      storeId: storeId!,
+    },
   });
 
   return NextResponse.json(category);

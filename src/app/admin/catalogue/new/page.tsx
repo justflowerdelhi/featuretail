@@ -65,6 +65,7 @@ export default function CreateProductPage() {
   const [baseSku, setBaseSku] = useState("");
   const [variants, setVariants] = useState<any[]>([]);
 
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [product, setProduct] = useState({
     name: "",
     slug: "",
@@ -159,8 +160,11 @@ export default function CreateProductPage() {
       imageIndex: i
     }));
 
+
     formData.append("variants", JSON.stringify(formattedVariants));
 
+    // ✅ ADD THIS
+    formData.append("tags", JSON.stringify(selectedTags));
 
     // IMAGES (CORRECT)
     images.forEach((img) => {
@@ -337,14 +341,28 @@ export default function CreateProductPage() {
 
         {/* TAGS */}
         {activeTab === "tags" && (
-          <input
-            value={product.tags}
-            placeholder="Tags (comma separated)"
-            onChange={(e) =>
-              setProduct({ ...product, tags: e.target.value })
-            }
-            className="w-full border p-2"
-          />
+          <div className="space-y-3">
+            {[
+              { label: "🔥 Best Seller", value: "best-seller" },
+              { label: "🆕 New Arrival", value: "new-arrival" },
+              { label: "⭐ Featured", value: "featured" },
+            ].map((tag) => (
+              <label key={tag.value} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectedTags.includes(tag.value)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedTags([...selectedTags, tag.value]);
+                    } else {
+                      setSelectedTags(selectedTags.filter(t => t !== tag.value));
+                    }
+                  }}
+                />
+                {tag.label}
+              </label>
+            ))}
+          </div>
         )}
 
         {/* STATUS */}

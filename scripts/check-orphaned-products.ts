@@ -3,29 +3,47 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function checkOrphanedProducts() {
-  // Find products with missing categories
+  // 1️⃣ Get all products with category relation
   const products = await prisma.product.findMany({
-  include: { category: true },
-});
+    include: { category: true },
+  });
 
-const orphaned = products.filter(p => !p.category);
-  // Find products with no images
+  // 2️⃣ Find orphaned (invalid category)
+  const productsWithInvalidCategory = products.filter(
+    (p) => !p.category
+  );
+
+  // 3️⃣ Products with no images
   const productsWithNoImages = await prisma.product.findMany({
     where: {
       images: { none: {} },
     },
   });
 
-  // Find products with no variants
+  // 4️⃣ Products with no variants
   const productsWithNoVariants = await prisma.product.findMany({
     where: {
       variants: { none: {} },
     },
   });
 
-  console.log('Products with invalid category:', productsWithInvalidCategory);
-  console.log('Products with no images:', productsWithNoImages);
-  console.log('Products with no variants:', productsWithNoVariants);
+  // ✅ Logs
+  console.log(
+    'Products with invalid category:',
+    productsWithInvalidCategory.length
+  );
+
+  console.log(
+    'Products with no images:',
+    productsWithNoImages.length
+  );
+
+  console.log(
+    'Products with no variants:',
+    productsWithNoVariants.length
+  );
 }
 
-checkOrphanedProducts().finally(() => prisma.$disconnect());
+checkOrphanedProducts()
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());

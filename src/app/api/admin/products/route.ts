@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import fs from "fs";
 import path from "path";
+import { getAdminStore } from "../../../../../lib/getAdminStore";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,12 @@ async function saveFile(file: File) {
 // =========================
 export async function GET() {
   try {
+    const store = await getAdminStore();
+    const storeId = store.id;
     const products = await prisma.product.findMany({
+      where: {
+        storeId: storeId, // ✅ FILTER
+      },
       include: {
         category: true,
         variants: {
@@ -52,25 +58,30 @@ export async function GET() {
 // =========================
 export async function POST(req: Request) {
   try {
+    const store = await getAdminStore();
+    const storeId = store.id;
     const formData = await req.formData();
 
     // BASIC FIELDS
     const name = formData.get("name") as string;
     const slug = formData.get("slug") as string;
     const description = formData.get("description") as string;
-
     const price = Number(formData.get("price") || 0);
     const stock = Number(formData.get("stock") || 0);
-
     const categoryId = formData.get("categoryId") as string;
     const rawSubCategoryId = formData.get("subCategoryId") as string;
-
-    const subCategoryId =
-      rawSubCategoryId && rawSubCategoryId !== ""
-        ? rawSubCategoryId
-        : null;
-
+    const subCategoryId = rawSubCategoryId && rawSubCategoryId !== "" ? rawSubCategoryId : null;
     const status = formData.get("status") as string;
+
+    // TAGS
+    const tagsRaw = formData.get("tags") as string;
+
+    let tags: string[] = [];
+    try {
+      tags = JSON.parse(tagsRaw);
+    } catch {
+      tags = [];
+    }
 
     // FILES
     const productFiles = formData.getAll("images") as File[];
@@ -90,17 +101,13 @@ export async function POST(req: Request) {
     const productImages = await Promise.all(
       productFiles.map(async (file, i) => {
         if (!(file instanceof File)) return null;
-
         const url = await saveFile(file);
-
         return {
           url,
           order: i, // ✅ correct ordering
         };
       })
     );
-
-    // remove nulls
     const cleanProductImages = productImages.filter(Boolean);
 
     // =========================
@@ -137,11 +144,22 @@ export async function POST(req: Request) {
         // status removed, not in Product model
         categoryId,
         subCategoryId,
+        storeId: store.id, // ✅ ATTACH STORE
         images: {
           create: cleanProductImages as any,
         },
         variants: {
           create: variantData,
+        },
+        tags: {
+          create: tags.map(tagName => ({
+            tag: {
+              connectOrCreate: {
+                where: { name: tagName },
+                create: { name: tagName }
+              }
+            }
+          }))
         },
       },
     });
@@ -149,7 +167,6 @@ export async function POST(req: Request) {
     return NextResponse.json(product);
   } catch (error: any) {
     console.error("PRODUCT CREATE ERROR:", error);
-
     return NextResponse.json(
       { error: error.message || "Failed" },
       { status: 500 }
