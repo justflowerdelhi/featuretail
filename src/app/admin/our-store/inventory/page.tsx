@@ -11,13 +11,16 @@ function generateSKU(name: string, color: string, size: string) {
   return [n, c, s].filter(Boolean).join("-");
 }
 
-export default function InventoryPage() {
 
+export default function InventoryPage() {
   // ✅ STATES
   const [data, setData] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
+  // 🚀 STEP 1 — Add Pagination State
+  const [page, setPage] = useState(1);
+  const pageSize = 100;
 
   const [form, setForm] = useState({
     sku: "",
@@ -30,6 +33,11 @@ export default function InventoryPage() {
     storageLocation: "",
     lowStockThreshold: "5",
   });
+
+  // Reset page on search change to avoid pagination issues
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
 
   // ✅ LOAD DATA
   useEffect(() => {
@@ -116,6 +124,12 @@ export default function InventoryPage() {
       (item.storageLocation || "").toLowerCase().includes(q)
     );
   });
+  // ✅ Add paginatedData
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  const paginatedData = filtered.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
 
   // ✅ AUTOSUGGEST OPTIONS
   const supplierOptions = useMemo(
@@ -125,6 +139,11 @@ export default function InventoryPage() {
 
   const locationOptions = useMemo(
     () => [...new Set(data.map((i) => i.storageLocation).filter(Boolean))],
+    [data]
+  );
+
+  const productNameOptions = useMemo(
+    () => [...new Set(data.map((i) => i.productName).filter(Boolean))],
     [data]
   );
 
@@ -150,7 +169,10 @@ export default function InventoryPage() {
 
           <input value={form.sku} readOnly className="border p-2 w-full mb-2 bg-gray-100" />
 
-          <input placeholder="Product Name" className="border p-2 w-full mb-2"
+          <input
+            list="product-name-list" // ✅ ADD THIS
+            placeholder="Product Name"
+            className="border p-2 w-full mb-2"
             value={form.productName}
             onChange={(e) => setForm({ ...form, productName: e.target.value })}
           />
@@ -192,6 +214,11 @@ export default function InventoryPage() {
           <datalist id="location-list">
             {locationOptions.map((l, i) => (
               <option key={i} value={l} />
+            ))}
+          </datalist>
+          <datalist id="product-name-list">
+            {productNameOptions.map((p, i) => (
+              <option key={i} value={p} />
             ))}
           </datalist>
 
@@ -248,7 +275,7 @@ export default function InventoryPage() {
         </thead>
 
         <tbody>
-          {filtered.map((item) => {
+          {paginatedData.map((item) => {
             const value = item.stock * (item.purchasePrice || 0);
 
             return (
@@ -312,6 +339,29 @@ export default function InventoryPage() {
           })}
         </tbody>
       </table>
+
+      {/* Pagination UI */}
+      <div className="flex justify-between items-center mt-4">
+        <button
+          onClick={() => setPage((p) => Math.max(p - 1, 1))}
+          disabled={page === 1}
+          className="px-4 py-2 border rounded disabled:opacity-50"
+        >
+          Previous
+        </button>
+
+        <span className="text-sm">
+          Page {page} of {totalPages}
+        </span>
+
+        <button
+          onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+          disabled={page === totalPages}
+          className="px-4 py-2 border rounded disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }

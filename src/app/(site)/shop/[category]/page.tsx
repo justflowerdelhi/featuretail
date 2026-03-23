@@ -1,6 +1,6 @@
-import { products } from "../../../data/products";
-import { categories } from "../../../data/categories";
-import ProductCard from "../../../components/ProductCard";
+import { products } from "@/data/products";
+import { categories } from "@/data/categories";
+import ProductCard from "@/components/ProductCard";
 import { Metadata } from "next";
 
 interface Props {
