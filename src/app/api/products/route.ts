@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 export async function GET() {
   try {
     const headersList = await headers();
-    const storeId = headersList.get("x-store-id");
+    const storeId = headersList.get("x-store-id") || "cmn0o7s4t0000w6784ebtdzf7";
 
     console.log("STORE ID IN API:", storeId);
 
@@ -50,11 +50,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const headersList = await headers();
-    const storeId = headersList.get("x-store-id");
-
-    if (!storeId) {
-      return NextResponse.json({ error: "Store not found" }, { status: 400 });
-    }
+    const storeId = headersList.get("x-store-id") || "cmn0o7s4t0000w6784ebtdzf7";
 
     const body = await req.json();
 

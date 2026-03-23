@@ -11,10 +11,7 @@ const prisma = new PrismaClient({ adapter });
 export async function POST(req: Request) {
   try {
     const headersList = await headers();
-    const storeId = headersList.get("x-store-id");
-    if (!storeId) {
-      return NextResponse.json({ success: false, message: "Store not found" }, { status: 400 });
-    }
+    const storeId = headersList.get("x-store-id") || "cmn0o7s4t0000w6784ebtdzf7";
     const { code, subtotal } = await req.json();
 
     const coupon = await prisma.coupon.findFirst({

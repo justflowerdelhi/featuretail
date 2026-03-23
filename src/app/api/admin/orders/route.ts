@@ -7,10 +7,7 @@ const prisma = new PrismaClient();
 /* GET */
 export async function GET() {
   const headersList = await headers();
-  const storeId = headersList.get("x-store-id");
-  if (!storeId) {
-    return NextResponse.json({ error: "Store not found" }, { status: 400 });
-  }
+  const storeId = headersList.get("x-store-id") || "cmn0o7s4t0000w6784ebtdzf7";
   const orders = await prisma.order.findMany({
     where: { storeId },
     include: { items: true },
@@ -22,10 +19,7 @@ export async function GET() {
 /* DELETE */
 export async function DELETE(req: Request) {
   const headersList = await headers();
-  const storeId = headersList.get("x-store-id");
-  if (!storeId) {
-    return NextResponse.json({ error: "Store not found" }, { status: 400 });
-  }
+  const storeId = headersList.get("x-store-id") || "cmn0o7s4t0000w6784ebtdzf7";
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id")!;
   // Only delete if order belongs to this store

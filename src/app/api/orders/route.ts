@@ -6,7 +6,7 @@ import { headers } from "next/headers";
 export async function POST(req: Request) {
   try {
     const headersList = await headers();
-    const storeId = headersList.get("x-store-id");
+    const storeId = headersList.get("x-store-id") || "cmn0o7s4t0000w6784ebtdzf7";
     const body = await req.json();
     if (!body.items || body.items.length === 0) {
       return NextResponse.json(
@@ -107,7 +107,7 @@ export async function POST(req: Request) {
 export async function GET() {
   try {
     const headersList = await headers();
-    const storeId = headersList.get("x-store-id");
+    const storeId = headersList.get("x-store-id") || "cmn0o7s4t0000w6784ebtdzf7";
     const orders = await prisma.order.findMany({
       where: {
         storeId: storeId!,

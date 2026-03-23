@@ -11,10 +11,7 @@ const prisma = new PrismaClient({ adapter });
 export async function GET() {
   try {
     const headersList = await headers();
-    const storeId = headersList.get("x-store-id");
-    if (!storeId) {
-      return NextResponse.json({ error: "Store not found" }, { status: 400 });
-    }
+    const storeId = headersList.get("x-store-id") || "cmn0o7s4t0000w6784ebtdzf7";
     const subcategories = await prisma.subCategory.findMany({
       where: { storeId },
       include: { category: true },
@@ -30,10 +27,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const headersList = await headers();
-    const storeId = headersList.get("x-store-id");
-    if (!storeId) {
-      return NextResponse.json({ error: "Store not found" }, { status: 400 });
-    }
+    const storeId = headersList.get("x-store-id") || "cmn0o7s4t0000w6784ebtdzf7";
     const data = await req.json();
     const subCategory = await prisma.subCategory.create({
       data: { ...data, storeId },

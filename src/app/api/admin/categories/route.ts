@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 export async function GET() {
   try {
     const headersList = await headers(); // ✅ FIX
-    const storeId = headersList.get("x-store-id");
+    const storeId = headersList.get("x-store-id") || "cmn0o7s4t0000w6784ebtdzf7";
     const categories = await prisma.category.findMany({
       where: {
         storeId: storeId!,
@@ -29,7 +29,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const headersList = await headers();
-  const storeId = headersList.get("x-store-id");
+  const storeId = headersList.get("x-store-id") || "cmn0o7s4t0000w6784ebtdzf7";
   const data = await req.json();
 
   const category = await prisma.category.create({
