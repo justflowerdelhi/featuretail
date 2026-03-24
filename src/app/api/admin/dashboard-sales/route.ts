@@ -3,8 +3,13 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { NextResponse } from "next/server";
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
+// ✅ FIX: cast pool to any to avoid type conflict
+const adapter = new PrismaPg(pool as any);
+
 const prisma = new PrismaClient({ adapter });
 
 export async function GET() {
@@ -21,7 +26,7 @@ export async function GET() {
 
   const salesByDate: Record<string, number> = {};
 
-  orders.forEach((order) => {
+  orders.forEach((order: any) => {
     const date = order.createdAt.toISOString().split("T")[0];
 
     if (!salesByDate[date]) {

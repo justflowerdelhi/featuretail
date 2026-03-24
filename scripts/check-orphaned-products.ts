@@ -10,8 +10,8 @@ async function checkOrphanedProducts() {
 
   // 2️⃣ Find orphaned (invalid category)
   const productsWithInvalidCategory = products.filter(
-    (p) => !p.category
-  );
+  (p: any) => !p.category
+);
 
   // 3️⃣ Products with no images
   const productsWithNoImages = await prisma.product.findMany({
@@ -47,3 +47,6 @@ async function checkOrphanedProducts() {
 checkOrphanedProducts()
   .catch(console.error)
   .finally(() => prisma.$disconnect());
+  
+  
+  

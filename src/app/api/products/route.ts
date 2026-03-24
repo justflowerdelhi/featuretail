@@ -34,10 +34,11 @@ export async function GET() {
       },
     });
 
-    // Flatten images to array of URLs
-    const formattedProducts = products.map((p) => ({
+    const formattedProducts = products.map((p: any) => ({
       ...p,
-      images: Array.isArray(p.images) ? p.images.map((img) => img.url) : [],
+      images: Array.isArray(p.images)
+        ? p.images.map((img: any) => img.url)
+        : [],
     }));
 
     return NextResponse.json(formattedProducts);
@@ -61,13 +62,13 @@ export async function POST(req: Request) {
     const product = await prisma.product.create({
       data: {
         ...body,
-        storeId, // 🔥 MUST
+        storeId,
       },
     });
 
     return NextResponse.json(product);
   } catch (error) {
-    console.error(error);
+    console.error("PRODUCT CREATE ERROR:", error);
     return NextResponse.json({ error: "Error" }, { status: 500 });
   }
 }
