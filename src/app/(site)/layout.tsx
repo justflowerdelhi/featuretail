@@ -1,11 +1,12 @@
-import React from "react";
+import Header from "@/components/Header";
+import CartDrawer from "@/components/cart/CartDrawer";
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>
-        {children}
-      </body>
-    </html>
+    <>
+      <Header />
+      {children}
+      <CartDrawer />
+    </>
   );
 }

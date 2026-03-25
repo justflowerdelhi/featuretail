@@ -16,12 +16,15 @@ export default async function Home() {
     <main>
       {/* ✅ HERO */}
       <section className="relative w-full mb-4 bg-white">
-        <img
-          src={store?.bannerImage || "/hero.jpg"}
-          alt="Banner"
-          className="w-full h-[220px] md:h-[420px] object-cover"
-        />
-
+        <div className="w-full aspect-[16/6] md:aspect-[16/5] lg:aspect-[16/4] max-h-[420px] overflow-hidden">
+          <img
+            src={store?.bannerImage || "/hero.jpg"}
+            alt="Banner"
+            className="w-full h-full object-cover object-center"
+            sizes="(max-width: 768px) 100vw, 100vw"
+            style={{ maxHeight: 420, width: '100%', height: '100%' }}
+          />
+        </div>
       </section>
 
       <section className="py-6 md:py-8 bg-gray-50">
