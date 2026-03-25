@@ -180,7 +180,29 @@ export default function ProductPage() {
               {isOutOfStock ? "Out of Stock" : "In Stock"}
             </p>
 
-            <button className="w-full mt-4 bg-yellow-400 hover:bg-yellow-500 text-black py-2 rounded font-medium">
+
+            <button
+              className="w-full mt-4 bg-yellow-400 hover:bg-yellow-500 text-black py-2 rounded font-medium transition"
+              disabled={isOutOfStock}
+              onClick={() => {
+                addToCart({
+                  id: product.id,
+                  name: product.name,
+                  slug: product.slug,
+                  price,
+                  images: product.images,
+                  category: product.category,
+                  stock: selectedVariant?.stock ?? product.stock ?? 0,
+                  createdAt: product.createdAt,
+                  description: product.description,
+                  features: product.features,
+                  variantId: selectedVariant?.id,
+                  variantName: selectedVariant?.name,
+                  quantity: 1,
+                });
+                window.location.href = "/checkout";
+              }}
+            >
               Buy Now
             </button>
 

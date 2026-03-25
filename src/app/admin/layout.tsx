@@ -1,49 +1,73 @@
 "use client";
 
-import { useState, ReactNode } from "react";
+import { useState } from "react";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import { Menu, ChevronLeft } from "lucide-react";
 
-interface AdminLayoutProps {
-  children: ReactNode;
-}
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
-export default function AdminLayout({ children }: AdminLayoutProps) {
-  const [open, setOpen] = useState(false);
-
+  console.log("mobileOpen:", mobileOpen);
   return (
-    <div className="flex flex-col md:flex-row min-h-screen">
-      {/* MOBILE SIDEBAR OVERLAY */}
-      {open && (
+    <div className="flex min-h-screen bg-gray-50">
+
+      {/* 🔥 MOBILE DRAWER */}
+      {mobileOpen && (
         <div className="fixed inset-0 z-50 flex">
-          <div className="flex-1 bg-black/50" onClick={() => setOpen(false)} />
-          <div className="w-64 max-w-full bg-white h-full p-4 overflow-y-auto shadow-lg animate-slide-in-right">
+
+          {/* BACKDROP */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setMobileOpen(false)}
+          />
+
+          {/* SIDEBAR */}
+          <div
+            className="relative w-64 bg-white h-full shadow-lg z-50"
+            onClick={(e) => e.stopPropagation()}  // ✅ IMPORTANT
+          >
             <AdminSidebar />
           </div>
         </div>
       )}
 
-      {/* DESKTOP SIDEBAR */}
-      <aside className="w-64 max-w-full bg-white border-r hidden md:block md:sticky md:top-0 md:h-screen md:overflow-y-auto">
-        <AdminSidebar />
+      {/* 💻 DESKTOP SIDEBAR */}
+      <aside
+        className={`hidden md:flex flex-col border-r bg-white transition-all
+        ${collapsed ? "w-16" : "w-64"}`}
+      >
+        {/* HEADER */}
+        <div className="flex items-center justify-between p-4 border-b">
+          {!collapsed && <span className="font-bold">Admin</span>}
+          <button onClick={() => setCollapsed(!collapsed)}>
+            <ChevronLeft size={18} />
+          </button>
+        </div>
+
+        <AdminSidebar collapsed={collapsed} />
       </aside>
 
-      {/* MAIN CONTENT */}
-      <main className="flex-1 w-full min-w-0">
-        {/* Hamburger for mobile */}
-        <div className="sticky top-0 z-30 bg-white/80 backdrop-blur border-b md:hidden flex items-center px-4 py-2 shadow-sm">
+      {/* 📦 MAIN */}
+      <div className="flex-1 flex flex-col">
+
+        {/* 🔝 TOP BAR */}
+        <div className="flex items-center gap-3 p-4 border-b bg-white">
+
+          {/* ☰ HAMBURGER (mobile) */}
           <button
-            className="p-2 rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
-            onClick={() => setOpen(true)}
-            aria-label="Open sidebar"
+            className="md:hidden"
+            onClick={() => setMobileOpen(true)}
           >
-            <span className="text-2xl">☰</span>
+            <Menu size={22} />
           </button>
-          <span className="ml-4 font-bold text-lg">Admin Panel</span>
+
+          <h1 className="font-semibold">Admin Panel</h1>
         </div>
-        <div className="p-4 sm:p-6 md:p-8">
-          {children}
-        </div>
-      </main>
+
+        {/* CONTENT */}
+        <main className="p-4">{children}</main>
+      </div>
     </div>
   );
 }
